@@ -23,6 +23,7 @@ macro_rules! __say_apply_sgr {
         sgr = [$($_old:tt)*],
         fmt = $fmt:expr,
         args = [$($args:expr),*],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = $rest,
@@ -34,6 +35,7 @@ macro_rules! __say_apply_sgr {
                 "m"
             ),
             args = [$($args),*],
+            newline = $newline,
         }
     };
 }
@@ -49,10 +51,14 @@ macro_rules! __say_parse {
         sgr = [$($sgr:tt)*],
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
     ) => {{
-
         // Always reset at the end
-        println!(concat!($fmt, "\x1b[0m"), $($args),*);
+        if $newline {
+            print!(concat!($fmt, "\x1b[0m", "\n"), $($args),*);
+        } else {
+            print!(concat!($fmt, "\x1b[0m"), $($args),*);
+        }
     }};
 
     // Comma separator - just skip it
@@ -61,12 +67,14 @@ macro_rules! __say_parse {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = $args:tt,
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = $fmt,
             args = $args,
+            newline = $newline,
         }
     };
 
@@ -76,12 +84,14 @@ macro_rules! __say_parse {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),*],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = concat!($fmt, $lit),
             args = [$($args),*],
+            newline = $newline,
         }
     };
 
@@ -91,12 +101,14 @@ macro_rules! __say_parse {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = $args:tt,
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse_debug! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = $fmt,
             args = $args,
+            newline = $newline,
         }
     };
 
@@ -106,6 +118,7 @@ macro_rules! __say_parse {
         sgr = [$($sgr:tt)*],
         fmt = $fmt:expr,
         args = $args:tt,
+        newline = $newline:expr,
     ) => {
         $crate::__say_style_dispatch! {
             style = $style,
@@ -113,6 +126,7 @@ macro_rules! __say_parse {
             sgr = [$($sgr)*],
             fmt = $fmt,
             args = $args,
+            newline = $newline,
         }
     };
 
@@ -122,12 +136,14 @@ macro_rules! __say_parse {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),*],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
             args = [$($args),*, $expr],
+            newline = $newline,
         }
     };
 
@@ -137,12 +153,14 @@ macro_rules! __say_parse {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),*],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
             args = [$($args),*, $expr],
+            newline = $newline,
         }
     };
 
@@ -157,13 +175,15 @@ macro_rules! __say_style_dispatch {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = $args:tt,
+        newline = $newline:expr,
     ) => {
         $crate::__say_style_dispatch_inner! {
             $style,
             rest = $rest,
             sgr = $sgr,
             fmt = $fmt,
-            args = $args
+            args = $args,
+            newline = $newline,
         }
     };
 }
@@ -172,106 +192,121 @@ macro_rules! __say_style_dispatch {
 #[macro_export]
 macro_rules! __say_style_dispatch_inner {
     // Match each known style and expand to __say_apply_sgr
-    (Reset, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [0], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Reset, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [0], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (Bold, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [1], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Bold, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [1], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (Underline, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [4], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Underline, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [4], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (Invert, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [7], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Invert, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [7], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
     // Pretty debug: Pretty #expr followed by comma
-    (Pretty, rest = [# $expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?]) => {
+    (Pretty, rest = [# $expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = concat!($fmt, "{:#?}"),
             args = [$($args,)* $expr],
+            newline = $newline,
         }
     };
 
     // Pretty debug: Pretty #expr at end
-    (Pretty, rest = [# $expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?]) => {
+    (Pretty, rest = [# $expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{:#?}"),
             args = [$($args,)* $expr],
+            newline = $newline,
         }
     };
 
-    (Black, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [30], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (Red, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [31], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (Green, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [32], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (Yellow, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [33], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (Blue, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [34], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (Magenta, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [35], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (Cyan, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [36], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
-    };
-    (White, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [37], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    // Inline: prints without the automatic newline
+    (Inline, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $_newline:expr,) => {
+        $crate::__say_parse! {
+            tokens = $rest,
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = false,
+        }
     };
 
-    (BlackHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [40], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Black, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [30], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (RedHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [41], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Red, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [31], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (GreenHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [42], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Green, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [32], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (YellowHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [43], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Yellow, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [33], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (BlueHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [44], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Blue, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [34], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (MagentaHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [45], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Magenta, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [35], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (CyanHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [46], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (Cyan, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [36], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (WhiteHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
-        $crate::__say_apply_sgr! { codes = [47], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    (White, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [37], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+
+    (BlackHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [40], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (RedHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [41], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (GreenHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [42], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (YellowHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [43], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (BlueHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [44], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (MagentaHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [45], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (CyanHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [46], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (WhiteHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [47], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
     // Fallback: identifier followed by . (method call/field access) - need to re-parse as expr
-    ($ident:ident, rest = [. $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
+    ($ident:ident, rest = [. $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_parse_expr! {
             tokens = [$ident . $($rest)*],
             sgr = $sgr,
             fmt = $fmt,
             args = $args,
+            newline = $newline,
         }
     };
 
     // Fallback for unknown identifiers - treat as simple expression
-    ($other:ident, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?]) => {
+    ($other:ident, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
         $crate::__say_parse! {
             tokens = $rest,
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
             args = [$($args,)* $other],
+            newline = $newline,
         }
     };
 }
@@ -285,12 +320,14 @@ macro_rules! __say_parse_expr {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
             args = [$($args,)* $expr],
+            newline = $newline,
         }
     };
 
@@ -300,12 +337,14 @@ macro_rules! __say_parse_expr {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
             args = [$($args,)* $expr],
+            newline = $newline,
         }
     };
 }
@@ -319,12 +358,14 @@ macro_rules! __say_parse_debug {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = concat!($fmt, "{:?}"),
             args = [$($args,)* $expr],
+            newline = $newline,
         }
     };
 
@@ -334,12 +375,14 @@ macro_rules! __say_parse_debug {
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{:?}"),
             args = [$($args,)* $expr],
+            newline = $newline,
         }
     };
 }

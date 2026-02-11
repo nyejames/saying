@@ -68,5 +68,12 @@ fn pretty_debug_display() {
     say!(Pretty #nested);
 }
 
+#[test]
+fn inline() {
+    say!("This is on a newline. ");
+    say!(Inline "This on a newline. ");
+    say!(Inline "This is inline with the previous line. ");
+}
+
 
 

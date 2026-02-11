@@ -11,6 +11,7 @@ macro_rules! say {
             sgr = [],
             fmt = "",
             args = [],
+            newline = true,
         }
     }};
 }
