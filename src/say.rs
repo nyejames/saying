@@ -146,7 +146,7 @@ macro_rules! __say_parse {
         }
     };
 
-    // Expression at end (no comma)
+    // Expression at the end (no comma)
     (
         tokens = [$expr:expr],
         sgr = $sgr:tt,
@@ -222,7 +222,7 @@ macro_rules! __say_style_dispatch_inner {
         }
     };
 
-    // Pretty debug: Pretty #expr at end
+    // Pretty debug: Pretty #expr at the end
     (Pretty, rest = [# $expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
         $crate::__say_parse! {
             tokens = [],
@@ -294,7 +294,7 @@ macro_rules! __say_style_dispatch_inner {
         $crate::__say_apply_sgr! { codes = [47], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
-    // Fallback: identifier followed by . (method call/field access) - need to re-parse as expr
+    // Fallback: identifier followed by '.' (method call/field access) - need to reparse as expr
     ($ident:ident, rest = [. $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_parse_expr! {
             tokens = [$ident . $($rest)*],
@@ -337,7 +337,7 @@ macro_rules! __say_parse_expr {
         }
     };
 
-    // Expression at end (no comma after)
+    // Expression at the end (no comma after)
     (
         tokens = [$expr:expr],
         sgr = $sgr:tt,
@@ -375,7 +375,7 @@ macro_rules! __say_parse_debug {
         }
     };
 
-    // Debug expression at end (no comma after)
+    // Debug expression at the end (no comma after)
     (
         tokens = [$expr:expr],
         sgr = $sgr:tt,
