@@ -40,7 +40,6 @@ macro_rules! __say_apply_sgr {
     };
 }
 
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __say_parse {
@@ -198,12 +197,19 @@ macro_rules! __say_style_dispatch_inner {
     (Bold, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [1], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
+    (Dim, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [2], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (Italic, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [3], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
     (Underline, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [4], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
     (Invert, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [7], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
+
 
     // Pretty debug: Pretty #expr followed by comma
     (Pretty, rest = [# $expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
@@ -386,5 +392,3 @@ macro_rules! __say_parse_debug {
         }
     };
 }
-
-

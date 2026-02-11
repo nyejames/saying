@@ -75,5 +75,12 @@ fn inline() {
     say!(Inline "This is inline with the previous line. ");
 }
 
+#[test]
+fn italics_with_reset() {
+    say!("This is ", Italic "italicised", Reset " text.");
+}
 
-
+#[test]
+fn dim() {
+    say!(Dim "This is dimmed text for some reason. Don't know why you would even want this tbh");
+}
