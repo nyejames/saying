@@ -31,40 +31,53 @@ say!(Red "Hi", Blue" there");
 // Multiple styles and multiple arguments
 // Using numbered colours for different palettes
 say!(
-    Red1 "Hello ", 
+    Red "Hello ", 
     Blue Bold " World", 
-    Red6 "!",
+    Red "!",
 );
 
 // Using Variables in the macro
 let subject = "world";
 let collection = vec![0, 1, 2];
 
-say!(Red10 Underline "Hello ", Orange2 subject, "!");
+say!(Red Underline "Hello ", Orange subject, "!");
 
 // With a debug print
 say!(Green "Numbers: ", #collection);
 
 // With a pretty debug print
-say!(Blue7 "Numbers: ", Pretty #collection);
+say!(Blue "Numbers: ", Pretty #collection);
 
 ```
 
 ### Colours
-There will be a variety of basic colour keywords, then a number with the range of 1 to 10.
+There will be a variety of basic colour keywords:
+- Black
+- White
+- Red
+- Green
+- Yellow
+- Blue
+- Magenta
+- Cyan
 
-Without the number, the colour is fully saturated.
-
-Numbered colours above 5 become brighter, numbers below 5 become darker.
-
+### Highlights
 Colour can also be a highlight for the background of the text. 
-You can change the background colour by adding "HL" after the colour name.
+You can change the background colour by adding "HL" after the colour name:
+- BlackHL
+- WhiteHL
+- RedHL
+- GreenHL
+- YellowHL
+- BlueHL
+- MagentaHL
+- CyanHL
 
 ```rust
 // Basic usage 
 say!(RedHL "Hi");
-say!(GreenHL8 "Hi");
-say!(Black YellowHL1 "Hi");
+say!(GreenHL "Hi");
+say!(Black YellowHL "Hi");
 ```
 
 ### Styles

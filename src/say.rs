@@ -85,6 +85,21 @@ macro_rules! __say_parse {
         }
     };
 
+    // Debug display: # followed by anything
+    (
+        tokens = [# $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+    ) => {
+        $crate::__say_parse_debug! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+        }
+    };
+
     // Could be a style keyword - dispatch to check
     (
         tokens = [$style:ident $($rest:tt)*],
@@ -168,6 +183,26 @@ macro_rules! __say_style_dispatch_inner {
     };
     (Invert, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
         $crate::__say_apply_sgr! { codes = [7], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
+    };
+
+    // Pretty debug: Pretty #expr followed by comma
+    (Pretty, rest = [# $expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?]) => {
+        $crate::__say_parse! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{:#?}"),
+            args = [$($args,)* $expr],
+        }
+    };
+
+    // Pretty debug: Pretty #expr at end
+    (Pretty, rest = [# $expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?]) => {
+        $crate::__say_parse! {
+            tokens = [],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{:#?}"),
+            args = [$($args,)* $expr],
+        }
     };
 
     (Black, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
@@ -270,6 +305,40 @@ macro_rules! __say_parse_expr {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
+            args = [$($args,)* $expr],
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __say_parse_debug {
+    // Debug expression followed by comma
+    (
+        tokens = [$expr:expr, $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+    ) => {
+        $crate::__say_parse! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{:?}"),
+            args = [$($args,)* $expr],
+        }
+    };
+
+    // Debug expression at end (no comma after)
+    (
+        tokens = [$expr:expr],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+    ) => {
+        $crate::__say_parse! {
+            tokens = [],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{:?}"),
             args = [$($args,)* $expr],
         }
     };

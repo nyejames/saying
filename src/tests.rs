@@ -31,7 +31,7 @@ fn complex_expressions() {
     let messages = vec![1, 2, 3];
     say!(Yellow "There are ", messages.len(), " messages");
     say!(Blue "Count: ", messages.len().to_string(), "!");
-    say!(Blue "Count: ", messages.len().to_string(), "!");
+    say!(Magenta "Count: ", messages.len().to_string(), White " - a different colour at the end");
 }
 
 #[test]
@@ -41,19 +41,32 @@ fn style_before_expression() {
 }
 
 #[test]
-fn debug_display_expression() {
-    let string_vec = vec!["Hello ", "World"];
-
-    say!(#string_vec);
+fn debug_display_function_call1() {
+    let timer = std::time::Instant::now();
+    say!(#timer.elapsed());
 }
 
-
 #[test]
-fn debug_display_function_call() {
+fn debug_display_function_call2() {
     fn func_test(arg: &str) -> String {
         format!("arg: {arg}")
     }
 
     say!(#func_test("test"));
 }
+
+#[test]
+fn debug_display_expression() {
+    let string_vec = vec!["Hello ", "World"];
+
+    say!(#string_vec);
+}
+
+#[test]
+fn pretty_debug_display() {
+    let nested = vec![vec![1, 2], vec![3, 4]];
+    say!(Pretty #nested);
+}
+
+
 
