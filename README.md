@@ -66,7 +66,7 @@ let collection = vec![0, 1, 2];
 say!(Red Underline "Hello ", Orange subject, "!");
 
 // Using expressions in the macro
-say!(Dim Magenta "Extreme Mathematics ", Bright {2 + 1});
+say!(Dark Magenta "Extreme Mathematics ", Bright {2 + 1});
 
 // With a debug print
 say!(Green "Numbers: ", #collection);
@@ -98,6 +98,7 @@ In conjunction with colours, basic style keywords can be used.
 - Invert (Swapped background and foreground colour)
 - Italics (Not as widely compatible)
 - Bright (Makes the colours brighter)
+- Dark (Makes the colours darker but can be inconsistent in different terminals)
 
 **Formatting**
 - Reset (Resets all colours and styles)

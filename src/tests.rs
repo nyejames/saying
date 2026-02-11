@@ -34,7 +34,7 @@ fn complex_expressions() {
     say!(Magenta "Count: ", messages.len().to_string(), White " - a different colour at the end");
 
     // Expression that needs to be evaluated
-    say!(Dim Magenta "Line ", Bright {2 + 1});
+    say!(Dark Magenta "Line ", Bright {2 + 1});
 }
 
 #[test]
@@ -93,7 +93,7 @@ fn bright() {
 
 #[test]
 fn dim() {
-    say!(Dim "This is dimmed text for some reason. Don't know why you would even want this tbh");
+    say!(Dark "This is dimmed text for some reason. Don't know why you would even want this tbh");
 }
 
 #[test]

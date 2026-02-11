@@ -204,7 +204,7 @@ macro_rules! __say_style_dispatch_inner {
     (Bold, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [1], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
-    (Dim, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+    (Dark, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [2], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
     (Italic, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
