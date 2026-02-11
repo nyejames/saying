@@ -65,11 +65,17 @@ let collection = vec![0, 1, 2];
 
 say!(Red Underline "Hello ", Orange subject, "!");
 
+// Using expressions in the macro
+say!(Dim Magenta "Extreme Mathematics ", Bright {2 + 1});
+
 // With a debug print
 say!(Green "Numbers: ", #collection);
 
 // With a pretty debug print
 say!(Blue "Numbers: ", Pretty #collection);
+
+
+
 ```
 
 ## Colours

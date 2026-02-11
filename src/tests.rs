@@ -32,6 +32,9 @@ fn complex_expressions() {
     say!(Yellow "There are ", messages.len(), " messages");
     say!(Blue "Count: ", messages.len().to_string(), "!");
     say!(Magenta "Count: ", messages.len().to_string(), White " - a different colour at the end");
+
+    // Expression that needs to be evaluated
+    say!(Dim Magenta "Line ", Bright {2 + 1});
 }
 
 #[test]
