@@ -4,15 +4,14 @@ Formatted printing adding ANSI SGR parameters.
 Not compatible with non-ANSI terminals.
 
 ```rust
-say!(Blue Bold "The most ergonomic printing macro for ansi");
+say!(Blue Bold "The most ergonomic printing macro");
 ```
 
-## Goals
+## Overview
 - Ergonomic as possible
 - Zero dependencies (except for std)
 - No runtime overhead, just parses into a single println!() using macro_rules
 
-## Overview
 Exports one macro. This prints to stdout only and automatically adds a newline.
 
 Once a colour or style is set, all proceeding arguments will use the same style until it is changed or reset.

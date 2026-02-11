@@ -25,3 +25,35 @@ fn multiple_styles() {
 fn highlight_colors() {
     say!(Black YellowHL "Warning!");
 }
+
+#[test]
+fn complex_expressions() {
+    let messages = vec![1, 2, 3];
+    say!(Yellow "There are ", messages.len(), " messages");
+    say!(Blue "Count: ", messages.len().to_string(), "!");
+    say!(Blue "Count: ", messages.len().to_string(), "!");
+}
+
+#[test]
+fn style_before_expression() {
+    let message = "yo";
+    say!(Cyan message, ", whats up?");
+}
+
+#[test]
+fn debug_display_expression() {
+    let string_vec = vec!["Hello ", "World"];
+
+    say!(#string_vec);
+}
+
+
+#[test]
+fn debug_display_function_call() {
+    fn func_test(arg: &str) -> String {
+        format!("arg: {arg}")
+    }
+
+    say!(#func_test("test"));
+}
+

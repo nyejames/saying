@@ -85,7 +85,7 @@ macro_rules! __say_parse {
         }
     };
 
-    // Could be a style
+    // Could be a style keyword - dispatch to check
     (
         tokens = [$style:ident $($rest:tt)*],
         sgr = [$($sgr:tt)*],
@@ -101,15 +101,30 @@ macro_rules! __say_parse {
         }
     };
 
-    // Expression
+    // Expression (complex, like method calls)
     (
-        tokens = [$expr:tt $($rest:tt)*],
+        tokens = [$expr:expr, $($rest:tt)*],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),*],
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{}"),
+            args = [$($args),*, $expr],
+        }
+    };
+
+    // Expression at end (no comma)
+    (
+        tokens = [$expr:expr],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),*],
+    ) => {
+        $crate::__say_parse! {
+            tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
             args = [$($args),*, $expr],
@@ -205,7 +220,17 @@ macro_rules! __say_style_dispatch_inner {
         $crate::__say_apply_sgr! { codes = [47], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, }
     };
 
-    // Fallback for unknown identifiers - treat as expression
+    // Fallback: identifier followed by . (method call/field access) - need to re-parse as expr
+    ($ident:ident, rest = [. $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt) => {
+        $crate::__say_parse_expr! {
+            tokens = [$ident . $($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+        }
+    };
+
+    // Fallback for unknown identifiers - treat as simple expression
     ($other:ident, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?]) => {
         $crate::__say_parse! {
             tokens = $rest,
@@ -216,5 +241,38 @@ macro_rules! __say_style_dispatch_inner {
     };
 }
 
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __say_parse_expr {
+    // Expression followed by comma
+    (
+        tokens = [$expr:expr, $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+    ) => {
+        $crate::__say_parse! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{}"),
+            args = [$($args,)* $expr],
+        }
+    };
+
+    // Expression at end (no comma after)
+    (
+        tokens = [$expr:expr],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+    ) => {
+        $crate::__say_parse! {
+            tokens = [],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{}"),
+            args = [$($args,)* $expr],
+        }
+    };
+}
 
 
