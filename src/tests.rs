@@ -92,3 +92,11 @@ fn bright() {
 fn dim() {
     say!(Dim "This is dimmed text for some reason. Don't know why you would even want this tbh");
 }
+
+#[test]
+fn escaped_braces() {
+    // Test that {} and {:?} in string literals are treated as literal text
+    say!("This has {} braces");
+    say!(Red "Debug format {:?} should work");
+    say!(Green "Multiple ", Blue "{} and {:?} and {:#?}", Yellow " braces");
+}

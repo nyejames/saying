@@ -51,9 +51,10 @@ say!(
 ```
 
 ## Formatting Arguments
-Instead of using the println "{}" syntax, you just add your expressions in order.
+Instead of using the println "{}" syntax, you add your expressions in order.
+Positional formatting is not supported.
 
-Any of those expression can have colours / styles in front of them.
+Any expression can have colours / styles in front of them.
 
 You can use # in front of an expression to debug print it. Use the keyword "Pretty" in front of this to also pretty print it.
 

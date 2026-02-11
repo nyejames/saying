@@ -81,19 +81,20 @@ macro_rules! __say_parse {
         }
     };
 
-    // String literal
+    // String literal - delegate to a helper to avoid metavariable forwarding issues
     (
         tokens = [$lit:literal $($rest:tt)*],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
-        args = [$($args:expr),*],
+        args = $args:tt,
         newline = $newline:expr,
     ) => {
-        $crate::__say_parse! {
-            tokens = [$($rest)*],
+        $crate::__say_parse_literal! {
+            lit = $lit,
+            rest = [$($rest)*],
             sgr = $sgr,
-            fmt = concat!($fmt, $lit),
-            args = [$($args),*],
+            fmt = $fmt,
+            args = $args,
             newline = $newline,
         }
     };
@@ -471,6 +472,29 @@ macro_rules! __say_parse_debug {
             sgr = $sgr,
             fmt = concat!($fmt, "{:?}"),
             args = [$($args,)* $expr],
+            newline = $newline,
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __say_parse_literal {
+    // Helper macro to handle string literals
+    // This adds the literal as an expression with "{}" to escape any braces it contains
+    (
+        lit = $lit:literal,
+        rest = $rest:tt,
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse! {
+            tokens = $rest,
+            sgr = $sgr,
+            fmt = concat!($fmt, "{}"),
+            args = [$($args,)* $lit],
             newline = $newline,
         }
     };
