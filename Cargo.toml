@@ -1,6 +1,13 @@
 [package]
 name = "saying"
-version = "0.1.4"
+description = "The say! macro for convenient styled printing"
+readme = "README.md"
+repository = "https://github.com/nyejames/saying"
+documentation = "https://github.com/nyejames/saying"
+version = "0.1.5"
 edition = "2024"
+license = "Apache 2.0"
+keywords = ["ansi", "color", "print", "macro", "styling"]
+categories = ["command-line-utilities", "command-line-interface"]
 
 [dependencies]

@@ -27,14 +27,24 @@ fn highlight_colors() {
 }
 
 #[test]
-fn complex_expressions() {
+fn expressions() {
     let messages = [1, 2, 3];
     say!(Yellow "There are ", messages.len(), " messages");
     say!(Blue "Count: ", messages.len().to_string(), "!");
     say!(Magenta "Count: ", messages.len().to_string(), White " - a different colour at the end");
+}
 
+#[test]
+fn complex_expressions() {
     // Expression that needs to be evaluated
+    // Using curly braces to avoid the expression being parsed as a style keyword
     say!(Dark Magenta "Line ", Bright {2 + 1});
+
+    let length_of_underline = 6;
+    say!(Red "^".repeat(length_of_underline));
+
+    // Curly braces for expression as first argument
+    say!(Red {2 + 1});
 }
 
 #[test]

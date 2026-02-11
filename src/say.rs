@@ -81,6 +81,23 @@ macro_rules! __say_parse {
         }
     };
 
+    // A literal followed by `.` (method call on literal like "^".repeat(n))
+    (
+        tokens = [$lit:literal . $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_expr! {
+            tokens = [$lit . $($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+        }
+    };
+
     // String literal - delegate to a helper to avoid metavariable forwarding issues
     (
         tokens = [$lit:literal $($rest:tt)*],
@@ -134,7 +151,7 @@ macro_rules! __say_parse {
         }
     };
 
-    // Expression (complex, like method calls)
+    // Expression (complex)
     (
         tokens = [$expr:expr, $($rest:tt)*],
         sgr = $sgr:tt,
@@ -380,6 +397,28 @@ macro_rules! __say_style_dispatch_inner {
     ($ident:ident, rest = [. $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_parse_expr! {
             tokens = [$ident . $($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+        }
+    };
+
+    // identifier followed by '!' (macro call like format!(...))
+    ($ident:ident, rest = [! $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_parse_expr! {
+            tokens = [$ident ! $($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+        }
+    };
+
+    // identifier followed by '::' (path like String::from(...))
+    ($ident:ident, rest = [:: $($rest:tt)*],  sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_parse_expr! {
+            tokens = [$ident :: $($rest)*],
             sgr = $sgr,
             fmt = $fmt,
             args = $args,
