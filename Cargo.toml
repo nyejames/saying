@@ -1,6 +1,7 @@
 [package]
 name = "saying"
 description = "The say! macro for convenient styled printing"
+authors = ["Nye James"]
 readme = "README.md"
 repository = "https://github.com/nyejames/saying"
 documentation = "https://github.com/nyejames/saying"
