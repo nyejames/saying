@@ -49,7 +49,9 @@ fn complex_expressions() {
     say!(Red "^".repeat(length_of_underline));
 
     // Curly braces for expression as the first argument
+    // Previously failed when others succeeded
     say!(Bold Blue (2 + 1));
+    say!((27 * 42));
 }
 
 #[test]
@@ -125,4 +127,10 @@ fn escaped_braces() {
     say!("This has {} braces");
     say!(Red "Debug format {:?} should work");
     say!(Green "Multiple ", Blue "{} and {:?} and {:#?}", Yellow " braces");
+}
+
+#[should_panic]
+fn only_style() {
+    // No expression provided after the style
+    say!(Red);
 }
