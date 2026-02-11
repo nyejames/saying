@@ -1,15 +1,18 @@
 <div align="center">
 
 # Saying
-### Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
+Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
 
 </div>
 
 ---
+<em style="color: gold;">
+<br>
 
+Not compatible with non-ANSI terminals.
+Currently only supports the basic 24-bit colour codes.
 
-*Not compatible with non-ANSI terminals.*
-*Only supports the basic 24-bit colour codes for maximum compatibility and simplicity.*
+</em>
 
 <br>
 
@@ -18,9 +21,9 @@ say!(Blue Bold "The most ergonomic printing macro");
 ```
 
 ## Overview
-- Ergonomic as possible
 - Zero dependencies (only uses std)
 - No runtime overhead, just parses into a single println!() at compile time using macro_rules
+- Ergonomic and readable
 
 Prints to stdout only and automatically adds a newline.
 
@@ -69,36 +72,42 @@ say!(Blue "Numbers: ", Pretty #collection);
 ```
 
 ## Colours
-There will be a variety of basic colour keywords:
-- Black
-- White
-- Red
-- Green
-- Yellow
-- Blue
-- Magenta
-- Cyan
+All the basic colour keywords:
+- <p style="color: white">White</p>
+- <p style="color: black">Black</p>
+- <p style="color: red">Red</p>
+- <p style="color: green">Green</p>
+- <p style="color: yellow">Yellow</p>
+- <p style="color: blue">Blue</p>
+- <p style="color: magenta">Magenta</p>
+- <p style="color: cyan">Cyan</p>
 
 ## Styles
 In conjunction with colours, basic style keywords can be used.
-- Reset (Resets all colours and styles)
+
+**Styling**
 - Bold (This can affect brightness in some terminals)
 - Underline
-- Inline (Removes the automatically inserted newline)
 - Invert (Swapped background and foreground colour)
 - Italics (Not as widely compatible)
+- Bright (Makes the colours brighter)
+
+**Formatting**
+- Reset (Resets all colours and styles)
+- Inline (Keeps this print inline with the previous one, removing the automatically inserted newline)
 
 ## Highlights
+
 Colour can also be a highlight for the background of the text. 
 You can change the background colour by adding "HL" after the colour name:
-- BlackHL
-- WhiteHL
-- RedHL
-- GreenHL
-- YellowHL
-- BlueHL
-- MagentaHL
-- CyanHL
+- <mark style="background-color: black; color: white;">BlackHL</mark>
+- <mark style="background-color: white; color: black;">WhiteHL</mark>
+- <mark style="background-color: red;">RedHL</mark>
+- <mark style="background-color: green;">GreenHL</mark>
+- <mark style="background-color: yellow;">YellowHL</mark>
+- <mark style="background-color: blue;">BlueHL</mark>
+- <mark style="background-color: magenta;">MagentaHL</mark>
+- <mark style="background-color: cyan;">CyanHL</mark>
 
 ```rust
 // Basic usage 

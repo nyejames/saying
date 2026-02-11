@@ -28,7 +28,7 @@ fn highlight_colors() {
 
 #[test]
 fn complex_expressions() {
-    let messages = vec![1, 2, 3];
+    let messages = [1, 2, 3];
     say!(Yellow "There are ", messages.len(), " messages");
     say!(Blue "Count: ", messages.len().to_string(), "!");
     say!(Magenta "Count: ", messages.len().to_string(), White " - a different colour at the end");
@@ -78,6 +78,14 @@ fn inline() {
 #[test]
 fn italics_with_reset() {
     say!("This is ", Italic "italicised", Reset " text.");
+}
+
+#[test]
+fn bright() {
+    say!(Bright "This BRIGHT TEXT");
+    say!("not bright but the", Bright "N IT GETS BLINDING.");
+    say!(Inline Bright Blue " INLINE BRIGHT MACRO FUN");
+    say!(Bright Red "CRINGE", Yellow " BRIGHT ", Magenta "TEXT");
 }
 
 #[test]
