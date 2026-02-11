@@ -6,34 +6,38 @@ Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
 </div>
 
 ---
-<em style="color: gold;">
-<br>
 
-Not compatible with non-ANSI terminals.
-Currently only supports the basic 24-bit colour codes.
+<em style="color: gold;">
+
+- Not compatible with non-ANSI terminals.
+- Currently only supports the basic 8 colours + 8 HL variants.
+- Does not respect NO_COLOR env var or perform runtime checks for compatibility.
 
 </em>
 
 <br>
 
 ```rust
-say!(Blue Bold "The most ergonomic printing macro");
+say!(Blue Bold "The most ergonomic printing macro.", Italic " Is finally here");
 ```
 
 ## Overview
 - Zero dependencies (only uses std)
-- No runtime overhead, just parses into a single println!() at compile time using macro_rules
+- No runtime overhead, just parses into a single println!() at compile time using macro_rules (no proc macros)
 - Ergonomic and readable
+- Any expression can just be used as an argument in position
 
-Prints to stdout only and automatically adds a newline.
+Prints to stdout only and automatically adds a newline (unless you use the Inline style).
 
 Once a colour or style is set, all proceeding arguments will use the same style until it is changed or reset.
+
+Just chuck some styles in front of your expressions (no need for anything between them), and you're good to go.
 
 ```rust
 // Basic usage 
 say!("Hi");
 say!(Green "Hi");
-say!(Yellow "Hi");
+say!(Yellow 2 + 2);
 
 // Multiple arguments
 say!("Hi", " there");
@@ -52,11 +56,13 @@ say!(
 
 ## Formatting Arguments
 Instead of using the println "{}" syntax, you add your expressions in order.
-Positional formatting is not supported.
+Positional formatting is not supported. This is an arguably a more readable alternative.
 
 Any expression can have colours / styles in front of them.
+Even if it's not a string literal.
 
-You can use # in front of an expression to debug print it. Use the keyword "Pretty" in front of this to also pretty print it.
+You can use # in front of an expression to debug print it. 
+Use the keyword "Pretty" to pretty print it.
 
 ```rust
 // Using Variables in the macro
@@ -65,10 +71,11 @@ let collection = vec![0, 1, 2];
 
 say!(Red Underline "Hello ", Orange subject, "!");
 
-// Using expressions in the macro
-// Parenthesis is required.
-// (You can also use braces if you're weird like that)
-say!(Dark Magenta "Extreme Mathematics ", Bright (2 + 1));
+// Using expressions in the macro -
+// You can optionally wrap expressions in parentheses or brackets if you really want.
+// But due to BIG BRAIN PARSING™ this is not required. 
+// You can just yeet expressions straight into the macro.
+say!(Dark Magenta "Extreme Mathematics ", Bright 2 + 1);
 
 // With a debug print
 say!(Green "Numbers: ", #collection);
@@ -126,7 +133,32 @@ say!(GreenHL "Hi");
 say!(Black YellowHL "Hi");
 ```
 
+## Debug Printing
+You can use the # keyword to debug print expressions.
+The "Pretty" keyword pretty prints expressions.
+
+The macro also supports various other formatting prefixes that start with a #:
+```rust
+let var = String::new();
+say!(Green "Hex: ", #x 255);                 // 0xff
+say!(Blue "Binary: ", #b 15);                // 0b1111
+say!(Red "Octal: ", #o 64);                  // 0o100
+say!(Yellow "Pointer: ", #p &var);           // 0x7fff...
+say!(Green "Scientific: ", #e 123456.789);   // 1.23456789e5
+say!(Blue "Scientific: ", #E 0.000123);      // 1.23E-4
+```
+
 <br>
 
-### Future
-This may be extended to 256 colours and more advanced styling in the future with backwards compatibility. This will allow opting into higher compatibility risk for the sake of some more pretty colours. Yay.
+**Loads of usage examples can be found in the [test file](https://github.com/nyejames/saying/blob/master/src/tests.rs).**
+
+## Errors
+You will get all the normal print!() errors if your arguments aren't valid.
+But the macro does throw a CompileError when you have styles in a macro, but no expressions.
+
+## Future
+This may be extended for advanced styling in the future with backwards compatibility. 
+This will allow opting into higher compatibility risk for the sake of some more pretty colours. Yay.
+
+There may also be an additional macro from this library in the future `yell()` that does have some runtime overhead, 
+so it can make sure the terminal supports more advanced colours before adding the codes.

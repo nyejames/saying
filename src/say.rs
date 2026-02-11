@@ -1,3 +1,9 @@
+// Yeah, this entire file is absolute macro chaos.
+// Declarative macros all the way down.
+// I'll probably refactor it so others can actually read it at some point.
+// (split up this file and make the macros more readable)
+// - Nye
+
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __say_join_sgr {
@@ -40,6 +46,7 @@ macro_rules! __say_apply_sgr {
             ),
             args = [$($args),*],
             newline = $newline,
+            skip = false,
         }
     };
 }
@@ -48,6 +55,18 @@ macro_rules! __say_apply_sgr {
 #[macro_export]
 macro_rules! __say_parse {
 
+    // End of input with styles but no expressions → error
+    (
+        tokens = [],
+        sgr = [$($sgr:tt)+],  // Non-empty (at least one style was applied)
+        fmt = $fmt:expr,
+        args = [],            // Empty (no expressions)
+        newline = $newline:expr,
+        skip = $skip:tt,
+    ) => {
+        compile_error!("say! macro has style keywords but no expression to print. Either remove the style keywords or add an expression")
+    };
+
     // End of input → emit
     (
         tokens = [],
@@ -55,6 +74,7 @@ macro_rules! __say_parse {
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
         newline = $newline:expr,
+        skip = false,
     ) => {{
         // Always reset at the end
         if $newline {
@@ -71,6 +91,7 @@ macro_rules! __say_parse {
         fmt = $fmt:expr,
         args = $args:tt,
         newline = $newline:expr,
+        skip = false,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
@@ -78,74 +99,27 @@ macro_rules! __say_parse {
             fmt = $fmt,
             args = $args,
             newline = $newline,
+            skip = false,
         }
     };
 
-    // A literal followed by `.` (method call on literal like "^".repeat(n))
-    (
-        tokens = [$lit:literal . $($rest:tt)*],
-        sgr = $sgr:tt,
-        fmt = $fmt:expr,
-        args = $args:tt,
-        newline = $newline:expr,
-    ) => {
-        $crate::__say_parse_expr! {
-            tokens = [$lit . $($rest)*],
-            sgr = $sgr,
-            fmt = $fmt,
-            args = $args,
-            newline = $newline,
-        }
-    };
-
-    // String literal - delegate to a helper to avoid metavariable forwarding issues
-    (
-        tokens = [$lit:literal $($rest:tt)*],
-        sgr = $sgr:tt,
-        fmt = $fmt:expr,
-        args = $args:tt,
-        newline = $newline:expr,
-    ) => {
-        $crate::__say_parse_literal! {
-            lit = $lit,
-            rest = [$($rest)*],
-            sgr = $sgr,
-            fmt = $fmt,
-            args = $args,
-            newline = $newline,
-        }
-    };
-
-    // Debug display: # followed by anything
+    // ----------------------
+    // Special Debug displays
+    // ----------------------
+    // Debug/format display: # followed by anything
     (
         tokens = [# $($rest:tt)*],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = $args:tt,
         newline = $newline:expr,
+        skip = false,
     ) => {
-        $crate::__say_parse_debug! {
+        $crate::__say_parse_format_dispatch! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = $fmt,
             args = $args,
-            newline = $newline,
-        }
-    };
-
-    // Parenthesised expression
-    (
-        tokens = [($($inner:tt)*) $($rest:tt)*],
-        sgr = $sgr:tt,
-        fmt = $fmt:expr,
-        args = [$($args:expr),* $(,)?],
-        newline = $newline:expr,
-    ) => {
-        $crate::__say_parse! {
-            tokens = [$($rest)*],
-            sgr = $sgr,
-            fmt = concat!($fmt, "{}"),
-            args = [$($args,)* ($($inner)*)],
             newline = $newline,
         }
     };
@@ -157,6 +131,7 @@ macro_rules! __say_parse {
         fmt = $fmt:expr,
         args = $args:tt,
         newline = $newline:expr,
+        skip = false,
     ) => {
         $crate::__say_style_dispatch! {
             style = $style,
@@ -170,38 +145,60 @@ macro_rules! __say_parse {
 
     // Expression (complex)
     (
-        tokens = [$expr:expr, $($rest:tt)*],
+        tokens = [$expr:expr $(, $($rest:tt)*)?],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
-        args = [$($args:expr),*],
+        args = [$($args:expr),* $(,)?],
         newline = $newline:expr,
+        skip = false,
     ) => {
         $crate::__say_parse! {
-            tokens = [$($rest)*],
+            tokens = [$($($rest)*)?],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
-            args = [$($args),*, $expr],
+            args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
 
-    // Expression at the end (no comma)
+    // Ending expression
     (
         tokens = [$expr:expr],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
-        args = [$($args:expr),*],
+        args = [$($args:expr),* $(,)?],
         newline = $newline:expr,
+        skip = false,
     ) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{}"),
-            args = [$($args),*, $expr],
+            args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
 
+    // This catches identifiers (and their continuations) that aren't style keywords
+    (
+        tokens = [$expr:expr $(, $($rest:tt)*)?],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
+        skip = true,
+    ) => {
+        $crate::__say_parse! {
+            tokens = [$($($rest)*)?],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{}"),
+            args = [$($args,)* $expr],
+            newline = $newline,
+            skip = false,  // Reset skip flag for normal processing
+        }
+    };
 }
 
 #[doc(hidden)]
@@ -262,6 +259,7 @@ macro_rules! __say_style_dispatch_inner {
             fmt = $fmt,
             args = $args,
             newline = false,
+            skip = false,
         }
     };
 
@@ -328,32 +326,54 @@ macro_rules! __say_style_dispatch_inner {
         $crate::__say_apply_sgr! { codes = [1], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
-
     // --------------
     //  PRETTY DEBUG
     // --------------
-    // Pretty #expr followed by comma
-    (Pretty, rest = [# $expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
+    // Pretty expr followed by comma
+    (Pretty, rest = [$expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
             fmt = concat!($fmt, "{:#?}"),
             args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
-
-    // Pretty debug: Pretty #expr at the end
-    (Pretty, rest = [# $expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
+    // Pretty debug: Pretty expr at the end
+    (Pretty, rest = [$expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
             fmt = concat!($fmt, "{:#?}"),
             args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
-
+    // ------------------------------------------------------------
+    //   Catch a debug hash if used after Pretty (to be forgiving)
+    // ------------------------------------------------------------
+    (Pretty, rest = [# $expr:expr, $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
+        $crate::__say_parse! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{:?}"),
+            args = [$($args,)* $expr],
+            newline = $newline,
+            skip = false,
+        }
+    };
+    (Pretty, rest = [# $expr:expr], sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
+        $crate::__say_parse! {
+            tokens = [],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{:?}"),
+            args = [$($args,)* $expr],
+            newline = $newline,
+            skip = false,
+        }
+    };
 
     // --------------
     //    COLOURS
@@ -443,16 +463,17 @@ macro_rules! __say_style_dispatch_inner {
         }
     };
 
-    // -------------------------
-    //  POSSIBLE NEW EXPRESSION
-    // -------------------------
-    ($other:ident, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = [$($args:expr),* $(,)?], newline = $newline:expr,) => {
+    // ------------
+    //  EXPRESSION
+    // ------------
+    ($other:ident, rest = [$($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_parse! {
-            tokens = $rest,
+            tokens = [$other $($rest)*],  // ✅ Creates [num + 1, "????"]
             sgr = $sgr,
-            fmt = concat!($fmt, "{}"),
-            args = [$($args,)* $other],
+            fmt = $fmt,
+            args = $args,
             newline = $newline,
+            skip = true,
         }
     };
 }
@@ -474,6 +495,7 @@ macro_rules! __say_parse_expr {
             fmt = concat!($fmt, "{}"),
             args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
 
@@ -491,67 +513,197 @@ macro_rules! __say_parse_expr {
             fmt = concat!($fmt, "{}"),
             args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
 }
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! __say_parse_debug {
-    // Debug expression followed by comma
+macro_rules! __say_parse_format_dispatch {
+    // Lowercase hex: #x
+    (
+        tokens = [x $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:x}",
+        }
+    };
+
+    // Uppercase hex: #X
+    (
+        tokens = [X $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:X}",
+        }
+    };
+
+    // Binary: #b
+    (
+        tokens = [b $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:b}",
+        }
+    };
+
+    // Octal: #o
+    (
+        tokens = [o $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:o}",
+        }
+    };
+
+    // Pointer: #p
+    (
+        tokens = [p $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:p}",
+        }
+    };
+
+    // Lowercase scientific: #e
+    (
+        tokens = [e $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:e}",
+        }
+    };
+
+    // Uppercase scientific: #E
+    (
+        tokens = [E $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:E}",
+        }
+    };
+
+    // Default: debug {:?} (when # is followed by expression directly)
+    (
+        tokens = $tokens:tt,
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = $tokens,
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = "{:?}",
+        }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __say_parse_format {
+    // Format expression followed by comma
     (
         tokens = [$expr:expr, $($rest:tt)*],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
         newline = $newline:expr,
+        format_spec = $format_spec:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [$($rest)*],
             sgr = $sgr,
-            fmt = concat!($fmt, "{:?}"),
+            fmt = concat!($fmt, $format_spec),
             args = [$($args,)* $expr],
             newline = $newline,
+            skip = false,
         }
     };
 
-    // Debug expression at the end (no comma after)
+    // Format expression at the end (no comma after)
     (
         tokens = [$expr:expr],
         sgr = $sgr:tt,
         fmt = $fmt:expr,
         args = [$($args:expr),* $(,)?],
         newline = $newline:expr,
+        format_spec = $format_spec:expr,
     ) => {
         $crate::__say_parse! {
             tokens = [],
             sgr = $sgr,
-            fmt = concat!($fmt, "{:?}"),
+            fmt = concat!($fmt, $format_spec),
             args = [$($args,)* $expr],
             newline = $newline,
-        }
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! __say_parse_literal {
-    // Helper macro to handle string literals
-    // This adds the literal as an expression with "{}" to escape any braces it contains
-    (
-        lit = $lit:literal,
-        rest = $rest:tt,
-        sgr = $sgr:tt,
-        fmt = $fmt:expr,
-        args = [$($args:expr),* $(,)?],
-        newline = $newline:expr,
-    ) => {
-        $crate::__say_parse! {
-            tokens = $rest,
-            sgr = $sgr,
-            fmt = concat!($fmt, "{}"),
-            args = [$($args,)* $lit],
-            newline = $newline,
+            skip = false,
         }
     };
 }

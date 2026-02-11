@@ -11,6 +11,7 @@ macro_rules! say {
             fmt = "",
             args = [],
             newline = true,
+            skip = false,
         }
     }};
 }
