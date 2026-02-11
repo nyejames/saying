@@ -133,6 +133,23 @@ macro_rules! __say_parse {
         }
     };
 
+    // Parenthesised expression
+    (
+        tokens = [($($inner:tt)*) $($rest:tt)*],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = [$($args:expr),* $(,)?],
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse! {
+            tokens = [$($rest)*],
+            sgr = $sgr,
+            fmt = concat!($fmt, "{}"),
+            args = [$($args,)* ($($inner)*)],
+            newline = $newline,
+        }
+    };
+
     // Could be a style keyword - dispatch to check
     (
         tokens = [$style:ident $($rest:tt)*],

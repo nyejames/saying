@@ -66,7 +66,9 @@ let collection = vec![0, 1, 2];
 say!(Red Underline "Hello ", Orange subject, "!");
 
 // Using expressions in the macro
-say!(Dark Magenta "Extreme Mathematics ", Bright {2 + 1});
+// Parenthesis is required.
+// (You can also use braces if you're weird like that)
+say!(Dark Magenta "Extreme Mathematics ", Bright (2 + 1));
 
 // With a debug print
 say!(Green "Numbers: ", #collection);

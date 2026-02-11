@@ -1,13 +1,18 @@
 use crate::say;
 
 #[test]
-fn basic_print() {
+fn basic() {
     say!("Hello World!");
 }
 
 #[test]
-fn styled_print() {
+fn bold() {
     say!(Red Bold "Hello");
+}
+
+#[test]
+fn underline() {
+    say!(Underline "Hello");
 }
 
 #[test]
@@ -38,19 +43,27 @@ fn expressions() {
 fn complex_expressions() {
     // Expression that needs to be evaluated
     // Using curly braces to avoid the expression being parsed as a style keyword
-    say!(Dark Magenta "Line ", Bright {2 + 1});
+    say!(Dark Magenta "Line ", Bright (2 + 1));
 
     let length_of_underline = 6;
     say!(Red "^".repeat(length_of_underline));
 
-    // Curly braces for expression as first argument
-    say!(Red {2 + 1});
+    // Curly braces for expression as the first argument
+    say!(Bold Blue (2 + 1));
 }
 
 #[test]
 fn style_before_expression() {
     let message = "yo";
     say!(Cyan message, ", whats up?");
+}
+
+#[test]
+fn method_calls() {
+    say!(Red "^".repeat(5));
+    say!(Blue "hello".to_uppercase());
+    say!(Green "  test  ".trim());
+    say!(Cyan 42.to_string());
 }
 
 #[test]
