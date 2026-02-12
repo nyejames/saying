@@ -69,7 +69,7 @@ Use the keyword "Pretty" to pretty print it.
 let subject = "world";
 let collection = vec![0, 1, 2];
 
-say!(Red Underline "Hello ", Orange subject, "!");
+say!(Red Underline "Hello ", Cyan subject, "!");
 
 // Using expressions in the macro -
 // You can optionally wrap expressions in parentheses or brackets if you really want.
