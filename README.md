@@ -3,6 +3,12 @@
 # Saying
 Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
 
+[![crates.io](https://img.shields.io/crates/v/saying.svg)](https://crates.io/crates/saying)
+[![crates.io](https://img.shields.io/crates/l/saying)](https://crates.io/crates/saying)
+[![crates.io](https://img.shields.io/deps-rs/saying/latest)](https://crates.io/crates/saying)
+[![crates.io](https://img.shields.io/crates/size/saying)](https://crates.io/crates/saying)
+
+
 </div>
 
 ---
@@ -20,6 +26,11 @@ Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
 ```rust
 say!(Blue Bold "The most ergonomic printing macro.", Italic " Is finally here");
 ```
+
+<br>
+<div align="center" >
+<code style="font-size: 1.5em">cargo add saying</code>
+</div>
 
 ## Overview
 - Zero dependencies (only uses std)
@@ -69,7 +80,7 @@ Use the keyword "Pretty" to pretty print it.
 let subject = "world";
 let collection = vec![0, 1, 2];
 
-say!(Red Underline "Hello ", Orange subject, "!");
+say!(Red Underline "Hello ", Cyan subject, "!");
 
 // Using expressions in the macro -
 // You can optionally wrap expressions in parentheses or brackets if you really want.
