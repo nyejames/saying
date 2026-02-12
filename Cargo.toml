@@ -5,6 +5,13 @@ authors = ["Nye James"]
 readme = "README.md"
 repository = "https://github.com/nyejames/saying"
 version = "0.1.6"
+include = [
+    "src/lib.rs",
+    "src/say.rs",
+    "README.md",
+    "LICENSE.txt",
+    "Cargo.toml",
+]
 edition = "2024"
 license = "Apache-2.0"
 keywords = ["ansi", "color", "print", "macro", "styling"]
