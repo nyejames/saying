@@ -37,6 +37,7 @@ mod tests;
 /// # Examples
 ///
 /// ```
+/// # use saying::say;
 /// // Status messages
 /// say!(Green Bold "✓ Build successful");
 /// say!(Red "✗ Test failed");
@@ -60,6 +61,7 @@ mod tests;
 /// in the order they should appear. Any valid Rust expression is allowed.
 ///
 /// ```rust
+/// # use saying::say;
 /// let x = 2 + 2;
 /// let name = "world";
 ///
@@ -88,15 +90,17 @@ mod tests;
 /// Use `Pretty` before `#` for pretty debug formatting (`{:#?}`).
 ///
 /// ```rust
+/// # use saying::say;
 /// let values = vec![1, 2, 3];
 ///
 /// say!(Green "Values: ", #values);
-/// say!(Blue "Values: ", Pretty #values);
+/// say!(Blue "Values: ", Pretty values);
 /// ```
 ///
 /// Additional `#`-based format specifiers are supported:
 ///
 /// ```rust
+/// # use saying::say;
 /// let n = 255;
 ///
 /// say!(Green "Hex: ", #x n);     // 0xff
@@ -119,6 +123,7 @@ mod tests;
 /// - `Inline`
 ///
 /// ```rust
+/// # use saying::say;
 /// say!(RedHL Bold "Warning");
 /// say!(Green Underline "Success");
 /// ```
