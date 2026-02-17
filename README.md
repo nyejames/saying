@@ -171,5 +171,5 @@ But the macro does throw a CompileError when you have styles in a macro, but no 
 This may be extended for advanced styling in the future with backwards compatibility. 
 This will allow opting into higher compatibility risk for the sake of some more pretty colours. Yay.
 
-There may also be an additional macro from this library in the future `yell()` that does have some runtime overhead, 
-so it can make sure the terminal supports more advanced colours before adding the codes.
+big Todo:
+- Generalise into a custom string formatter (instead of format!()) and replace invoking print!() with calling _print!() with this custom formatter. This will reduce compile time cost even further and allow curly braces to be used without the need for escaping.
