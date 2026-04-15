@@ -204,6 +204,9 @@ fn yap() {
     say!(Green "Scientific: ", #e 123456.789); // 1.23456789e5
     say!(Blue "Scientific: ", #E 0.000123); // 1.23E-4
 
+    say!(Green "Display precision: ", #3 12345.124512);
+    say!(#1 3.6666, #0 123.0, #10 1.111123);
+
     say!();
 
     // Colours

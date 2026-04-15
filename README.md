@@ -8,7 +8,6 @@ Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
 [![crates.io](https://img.shields.io/deps-rs/saying/latest)](https://crates.io/crates/saying)
 [![crates.io](https://img.shields.io/crates/size/saying)](https://crates.io/crates/saying)
 
-
 </div>
 
 ---
@@ -97,7 +96,8 @@ say!(Green "Numbers: ", #collection);
 // With a pretty debug print
 say!(Blue "Numbers: ", Pretty #collection);
 
-
+// Applies Rust display precision for the next float expression only
+say!(#6 3.14159265358, " is pi to 6 decimal places");
 
 ```
 
@@ -160,12 +160,13 @@ The "Pretty" keyword pretty prints expressions.
 The macro also supports various other formatting prefixes that start with a #:
 ```rust
 let var = String::new();
-say!(Green "Hex: ", #x 255);                 // 0xff
-say!(Blue "Binary: ", #b 15);                // 0b1111
-say!(Red "Octal: ", #o 64);                  // 0o100
-say!(Yellow "Pointer: ", #p &var);           // 0x7fff...
-say!(Green "Scientific: ", #e 123456.789);   // 1.23456789e5
-say!(Blue "Scientific: ", #E 0.000123);      // 1.23E-4
+say!(Green "Hex: ", #x 255);                        // 0xff
+say!(Blue "Binary: ", #b 15);                       // 0b1111
+say!(Red "Octal: ", #o 64);                         // 0o100
+say!(Yellow "Pointer: ", #p &var);                  // 0x7fff...
+say!(Green "Scientific: ", #e 123456.789);          // 1.23456789e5
+say!(Blue "Scientific: ", #E 0.000123);             // 1.23E-4
+say!(Cyan "Display precision: ", #3 12345.124512);  // 12345.124
 ```
 
 <br>

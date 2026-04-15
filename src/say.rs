@@ -546,6 +546,37 @@ macro_rules! __say_parse_expr {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __say_parse_format_dispatch {
+    // Decimal places: #3 expr => {:.3}
+    (
+        tokens = [$precision:literal],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        compile_error!(
+            "say! decimal precision prefix requires an expression after it. Example: say!(#3 3.1415926)"
+        )
+    };
+
+    // Decimal places: #3 expr => {:.3}
+    (
+        tokens = [$precision:literal $($rest:tt)+],
+        sgr = $sgr:tt,
+        fmt = $fmt:expr,
+        args = $args:tt,
+        newline = $newline:expr,
+    ) => {
+        $crate::__say_parse_format! {
+            tokens = [$($rest)+],
+            sgr = $sgr,
+            fmt = $fmt,
+            args = $args,
+            newline = $newline,
+            format_spec = concat!("{:.", stringify!($precision), "}"),
+        }
+    };
+
     // Lowercase hex: #x
     (
         tokens = [x $($rest:tt)*],
@@ -672,7 +703,7 @@ macro_rules! __say_parse_format_dispatch {
         }
     };
 
-    // Default: debug {:?} (when # is followed by expression directly)
+    // Default: debug {:?}
     (
         tokens = $tokens:tt,
         sgr = $sgr:tt,
