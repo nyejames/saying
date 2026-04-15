@@ -291,6 +291,15 @@ macro_rules! __say_style_dispatch_inner {
         $crate::__say_apply_sgr! { codes = [97], rest = [$($rest)*], sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
+    // Pointless but avoids an error
+    // Bright gray = white
+    (Bright, rest = [Grey $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [97], rest = [$($rest)*], sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (Bright, rest = [Gray $($rest:tt)*], sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [97], rest = [$($rest)*], sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+
     // -------------------
     //  BRIGHT BACKGROUND
     // -------------------
@@ -403,6 +412,14 @@ macro_rules! __say_style_dispatch_inner {
         $crate::__say_apply_sgr! { codes = [37], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
+    // Same as bright black
+    (Grey, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [90], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (Gray, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [90], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+
     (BlackHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [40], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
@@ -426,6 +443,14 @@ macro_rules! __say_style_dispatch_inner {
     };
     (WhiteHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
         $crate::__say_apply_sgr! { codes = [47], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+
+    // Same as bright black highlight
+    (GreyHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [100], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
+    };
+    (GrayHL, rest = $rest:tt, sgr = $sgr:tt, fmt = $fmt:expr, args = $args:tt, newline = $newline:expr,) => {
+        $crate::__say_apply_sgr! { codes = [100], rest = $rest, sgr = $sgr, fmt = $fmt, args = $args, newline = $newline, }
     };
 
     // --------------------------------------------------------------------------------

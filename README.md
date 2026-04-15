@@ -18,6 +18,7 @@ Formatted printing macro `say!` for easy, zero-cost ANSI SGR colours and styles
 - Not compatible with non-ANSI terminals.
 - Currently only supports the basic 8 colours + 8 HL variants.
 - Does not respect NO_COLOR env var or perform runtime checks for compatibility.
+- Does not directly buffer its own output.
 
 </em>
 
@@ -33,9 +34,10 @@ say!(Blue Bold "The most ergonomic printing macro.", Italic " Is finally here");
 </div>
 
 ## Overview
-- Zero dependencies (only uses std)
+- Zero dependencies (only std)
 - No runtime overhead, just parses into a single println!() at compile time using macro_rules (no proc macros)
 - Ergonomic and readable
+- Escapes curly braces (no curly brace formatting)
 - Any expression can just be used as an argument in position
 
 Prints to stdout only and automatically adds a newline (unless you use the Inline style).
@@ -43,6 +45,7 @@ Prints to stdout only and automatically adds a newline (unless you use the Inlin
 Once a colour or style is set, all proceeding arguments will use the same style until it is changed or reset.
 
 Just chuck some styles in front of your expressions (no need for anything between them), and you're good to go.
+
 
 ```rust
 // Basic usage 
@@ -102,12 +105,15 @@ say!(Blue "Numbers: ", Pretty #collection);
 All the basic colour keywords:
 - <p style="color: white">White</p>
 - <p style="color: black">Black</p>
+- <p style="color: gray">Gray</p>
 - <p style="color: red">Red</p>
 - <p style="color: green">Green</p>
 - <p style="color: yellow">Yellow</p>
 - <p style="color: blue">Blue</p>
 - <p style="color: magenta">Magenta</p>
 - <p style="color: cyan">Cyan</p>
+
+<sup> Alternative "grey" spelling can be used too</sup>
 
 ## Styles
 In conjunction with colours, basic style keywords can be used.
@@ -130,12 +136,15 @@ Colour can also be a highlight for the background of the text.
 You can change the background colour by adding "HL" after the colour name:
 - <mark style="background-color: black; color: white;">BlackHL</mark>
 - <mark style="background-color: white; color: black;">WhiteHL</mark>
+- <mark style="background-color: gray; color: black;">GrayHL</mark>
 - <mark style="background-color: red;">RedHL</mark>
 - <mark style="background-color: green;">GreenHL</mark>
 - <mark style="background-color: yellow;">YellowHL</mark>
 - <mark style="background-color: blue;">BlueHL</mark>
 - <mark style="background-color: magenta;">MagentaHL</mark>
 - <mark style="background-color: cyan;">CyanHL</mark>
+
+<sup> Alternative "grey" spelling can be used too</sup>
 
 ```rust
 // Basic usage 
@@ -166,10 +175,3 @@ say!(Blue "Scientific: ", #E 0.000123);      // 1.23E-4
 ## Errors
 You will get all the normal print!() errors if your arguments aren't valid.
 But the macro does throw a CompileError when you have styles in a macro, but no expressions.
-
-## Future
-This may be extended for advanced styling in the future with backwards compatibility. 
-This will allow opting into higher compatibility risk for the sake of some more pretty colours. Yay.
-
-big Todo:
-- Generalise into a custom string formatter (instead of format!()) and replace invoking print!() with calling _print!() with this custom formatter. This will reduce compile time cost even further and allow curly braces to be used without the need for escaping.
